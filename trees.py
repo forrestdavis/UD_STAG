@@ -27,7 +27,7 @@ def extractSentences(data_file):
     return texts, sentences
 
 
-def buildUp(text, sentence, num):
+def buildUp(sentence, text):
 
     print text, "\n"
 
@@ -41,31 +41,81 @@ def buildUp(text, sentence, num):
 
         print "------------------------------------------------------\n"
 
-def buildDown(text, sentence, num):
+def buildDown(sentence, text, verbose=True):
     
-    print text, "\n"
+    if verbose:
+        print text, "\n"
+
     children = {}
     for node in sentence:
         parent_index = node[6]
         child_index = node[0]
-        if parent_index in children:
+        if parent_index == "_":
+            print text
+            print node
+        elif parent_index in children:
             l = children[parent_index]
             l.append(child_index)
             children[parent_index] = l
         else:
             children[parent_index] = [child_index]
 
-    for key in children:
-        if key == "0":
-            print "\troot"
-            for child_index in children[key]:
-                print sentence[int(child_index)-1]
-            print "--------------------------------------------------\n"
-        else:
-            print "\t",sentence[int(key)-1]
-            for child_index in children[key]:
-                print sentence[int(child_index)-1]
-            print "--------------------------------------------------\n"
+    if verbose:
+        for key in children:
+            if key == "0":
+                print "\tROOT"
+                for child_index in children[key]:
+                    print sentence[int(child_index)-1]
+                print "--------------------------------------------------\n"
+            else:
+                print "\t",sentence[int(key)-1]
+                for child_index in children[key]:
+                    print sentence[int(child_index)-1]
+                print "--------------------------------------------------\n"
+    return children
+
+def makeTrees(sentences):
+
+    trees = []
+    counts = {}
+
+    num = 0
+    for sentence in sentences:
+        children_dict = buildDown(sentence, '', False)
+        num +=1
+
+        #Key sorting work around
+        for key in children_dict:
+            tmp = []
+            notAdded = 1
+            for child in children_dict[key]:
+                if int(key) < int(child) and notAdded:
+                    tmp.append(key)
+                    notAdded = 0
+                tmp.append(child)
+
+        #Create proto-trees with POS
+        for key in children_dict:
+            tree = []
+            if key == "0":
+                tree.append("ROOT")
+            else:
+                tree.append(sentence[int(key)-1][3])
+
+            for child_index in children_dict[key]:
+                tree.append(sentence[int(child_index)-1][3])
+            if tree not in trees:
+                trees.append(tree)
+            if tuple(tree) not in counts:
+                counts[tuple(tree)] = 1
+            elif tuple(tree) in counts:
+                counts[tuple(tree)] = counts[tuple(tree)]+1
+
+    return trees, counts
+            
+
+
+
 
 
 if __name__ == '__main__':
@@ -73,9 +123,20 @@ if __name__ == '__main__':
     data_file = "./ud-treebanks-conll2017/UD_English/en-ud-train.conllu"
     texts, sentences = extractSentences(data_file)
 
-    num = 20
+    num = 61
     text = texts[num]
     sentence = sentences[num]
-    buildUp(text, sentence, num)
-    buildDown(text, sentence, num)
+    #buildUp(sentence, text)
+    #buildDown(sentence, text)
+    trees, counts = makeTrees(sentences)
 
+    print len(sentences)
+    print len(trees)
+
+    freq_tags = []
+    for key in counts:
+        if counts[key] > 1:
+            freq_tags.append(key)
+    print len(freq_tags)
+
+    print len(trees) - len(freq_tags)
