@@ -1,4 +1,3 @@
-
 def extractSentences(data_file):
 
     data = open(data_file, "r")
@@ -113,30 +112,34 @@ def makeTrees(sentences):
 
     return trees, counts
             
+def checkProjective(texts, sentences):
 
+    location = 0
 
-
-
+    return texts
 
 if __name__ == '__main__':
 
     data_file = "./ud-treebanks-conll2017/UD_English/en-ud-train.conllu"
     texts, sentences = extractSentences(data_file)
 
-    num = 61
+
+    num = 1027
     text = texts[num]
     sentence = sentences[num]
     #buildUp(sentence, text)
     #buildDown(sentence, text)
+
     trees, counts = makeTrees(sentences)
 
-    print len(sentences)
-    print len(trees)
+    print "Number of sentences: ", len(sentences)
+    print "Number of trees: ", len(trees)
 
+    threshold = 1
     freq_tags = []
     for key in counts:
-        if counts[key] > 1:
+        if counts[key] > threshold:
             freq_tags.append(key)
-    print len(freq_tags)
+    print "Number of trees with occcurence greater than ", threshold, " : ", len(freq_tags)
 
-    print len(trees) - len(freq_tags)
+    print "Number of trees with occurence less than ", threshold, " : ", len(trees) - len(freq_tags)
