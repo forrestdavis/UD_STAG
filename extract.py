@@ -65,6 +65,7 @@ def Trees(sentences):
                     tree = black_node + "(black_node)----"+dep+"--->"+white_node
                 else:
                     tree = white_node + '<---'+dep+'----'+black_node+"(black_node)"
+
                 if tree not in trees:
                     trees[tree] = ["d"+str(num), 1]
                     num += 1
@@ -121,8 +122,8 @@ def Trees(sentences):
                     output.append([trees[tree], tree])
         '''
 
-        for tree in trees:
-            print trees[tree], tree
+    for tree in trees:
+        print trees[tree], tree
 
 
 if __name__ == '__main__':
