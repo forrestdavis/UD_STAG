@@ -16,22 +16,22 @@ def Trees(sentences):
         #First pass to create hash map of sentence
         #as well as locate root child and verb locations
         for node in sentence:
-            sent_hash[node[0]] = (node[3], node[6], node[7])
+            sent_hash[int(node[0])] = (node[3], int(node[6]), node[7])
             if node[3] == "VERB":
-                verb_locs.append(node[0])
+                verb_locs.append(int(node[0]))
             if node[7] == "root":
-                root_loc = node[0]
+                root_loc = int(node[0])
 
         #Second pass to create trees
         verb_child = {}
         placed_Verb = 0
         need_Verb = 0
         for node in sentence:
-            index = node[0]
-            head = node[6]
+            index = int(node[0])
+            head = int(node[6])
             pos = node[3]
             dep = node[7]
-
+            
             if head in verb_locs and pos != "AUX":# and pos != "PUNCT":
                 tree = pos + "(black_node)"
                 if tree not in trees:
@@ -41,6 +41,7 @@ def Trees(sentences):
                     trees[tree][1] += 1
 
                 if pos != "PUNCT":
+                    print node
                     if head < index and not placed_Verb:
                         need_Verb = 1
                     if head not in verb_child:
@@ -73,7 +74,7 @@ def Trees(sentences):
                     trees[tree][1] += 1
 
             else:
-                if head != "0":
+                if head != 0:
                     black_node = pos
                     head_node = sent_hash[head]
                     white_node = head_node[0]
@@ -88,8 +89,9 @@ def Trees(sentences):
                         trees[tree][1] += 1
         
 
-        crossed_Verb = 0
+        print verb_child
         for verb_index in verb_child:
+            crossed_Verb = 0
             tree = ''
             for child in verb_child[verb_index]:
                 if child[0] != 'VERB':
@@ -129,6 +131,6 @@ def Trees(sentences):
 if __name__ == '__main__':
 
     #data_file = "./ud-treebanks-conll2017/UD_English/en-ud-train.conllu"
-    data_file = "./simple_example.conllu"
+    data_file = "./reduced.conllu"
     texts, sentences = s.extractSentences(data_file)
     Trees(sentences)
