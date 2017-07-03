@@ -7,6 +7,7 @@
 #June 30, 2017
 ##############################################################
 ##############################################################
+import collections, os
 
 #Returns dictionary, key: value = dependency: 0/1
 #if 0, dep represents a substitution node
@@ -22,13 +23,16 @@ def Deps(dep_file):
             
             if len(line) == 2:
                 deps[line[0]] = line[1]
+            else:
+                print "error with following dep: "
+                print line
     
     deps_info.close()
     return deps
 
 #Function for scraping sentence for trees and writing to file
 def extract(num, trees, sentence_hash, arguments, deps, output, out):
-    
+
     for word in output:
 
         dep = word[7]
@@ -48,8 +52,7 @@ def extract(num, trees, sentence_hash, arguments, deps, output, out):
             word.append(tree_num)
             out.write('\t'.join(word)+'\n')
         #Word is argument of verb, thus is only black node
-        elif(word[6] in arguments and deps[dep]=='0' 
-                and word[3]!="VERB"):
+        elif(word[6] in arguments and deps[dep]=='0'): #and word[3]!="VERB"):
             tree = word[3]+'\t'+ 'b\n'
             if tree in trees:
                 tree_num = trees[tree][0]
@@ -60,8 +63,18 @@ def extract(num, trees, sentence_hash, arguments, deps, output, out):
                 num[0]+=1
             word.append(tree_num)
             out.write('\t'.join(word)+'\n')
-        #Word is a verb 
+        #Word is a verb or root
         elif word[0] in arguments:
+            '''
+            #Handle parataxis NEED TO CHECK
+            if word[7] == 'root' and word[3] == "NOUN":
+                if len(arguments[word[0]]) > 2:
+                    print '---------------------------'
+                    print arguments
+                    for w in output:
+                        print w
+            else:
+            '''
             crossed_Verb = 0
             tree = ''
             for arg in arguments[word[0]]:
@@ -73,9 +86,11 @@ def extract(num, trees, sentence_hash, arguments, deps, output, out):
                 elif crossed_Verb:
                     tree+= '  '+sentence_hash[arg][2]+'\n'
                     tree+= sentence_hash[arg][0]+'\tw\n'
-                else:
-                    tree+= sentence_hash[arg][0]+'\tw\n'
+                else: 
+                    tree+= sentence_hash[arg][0]+'\tw\n' 
                     tree+= '  '+sentence_hash[arg][2]+'\n'
+            if not crossed_Verb:
+                tree+= '\t'+word[3]+'\t'+'b\n'
             if tree in trees:
                 tree_num = trees[tree][0]
                 trees[tree][1] += 1
@@ -88,12 +103,8 @@ def extract(num, trees, sentence_hash, arguments, deps, output, out):
 
         #Word is a adjunct
         elif deps[dep] == '1':
-            head = sentence_hash[word[0]][1]
-            index = word[0]
-            if int(head) < int(index):
-                tree = sentence_hash[head][0]+'\t'+'w\n'
-                tree += '  '+dep+'\n'
-                tree += '\t'+word[3]+'\t'+'b\n'
+            if dep == 'root':
+                tree = word[3]+'\t'+'b\n'
                 if tree in trees:
                     tree_num = trees[tree][0]
                     trees[tree][1] += 1
@@ -103,33 +114,63 @@ def extract(num, trees, sentence_hash, arguments, deps, output, out):
                     num[0]+=1
                 word.append(tree_num)
                 out.write('\t'.join(word)+'\n')
+
             else:
-                tree = '\t'+sentence_hash[head][0]+'\t'+'w\n'
-                tree += '  '+dep+'\n'
-                tree += word[3]+'\t'+'b\n'
-                if tree in trees:
-                    tree_num = trees[tree][0]
-                    trees[tree][1] += 1
-
+                head = sentence_hash[word[0]][1]
+                index = word[0]
+                if int(head) < int(index):
+                    tree = sentence_hash[head][0]+'\t'+'w\n'
+                    tree += '  '+dep+'\n'
+                    tree += '\t'+word[3]+'\t'+'b\n'
+                    if tree in trees:
+                        tree_num = trees[tree][0]
+                        trees[tree][1] += 1
+                    else:
+                        tree_num = 'd'+str(num[0])
+                        trees[tree] = [tree_num, 1]
+                        num[0]+=1
+                    word.append(tree_num)
+                    out.write('\t'.join(word)+'\n')
                 else:
-                    tree_num = 'd'+str(num[0])
-                    trees[tree] = [tree_num, 1]
-                    num[0]+=1
-                word.append(tree_num)
-                out.write('\t'.join(word)+'\n')
-            
-    out.write('\n')
-    
+                    tree = '\t'+sentence_hash[head][0]+'\t'+'w\n'
+                    tree += '  '+dep+'\n'
+                    tree += word[3]+'\t'+'b\n'
+                    if tree in trees:
+                        tree_num = trees[tree][0]
+                        trees[tree][1] += 1
 
-def Trees(data_file, dep_file, output_file):
+                    else:
+                        tree_num = 'd'+str(num[0])
+                        trees[tree] = [tree_num, 1]
+                        num[0]+=1
+                    word.append(tree_num)
+                    out.write('\t'.join(word)+'\n')
+                
+        else:
+            print "-----------------------------------"
+            print "ERROR:"
+            for w in output:
+                if w == word:
+                    print '\t', w
+                else:
+                    print w
+
+    out.write('\n')
+
+def Trees(data_file, dep_file, output_file, trees=None):
     #List to be mutable
-    num = [1]
+    if not trees:
+        num = [1]
+    #If using set of trees start count from last tree
+    else:
+        num = [len(trees)+1]
     deps = Deps(dep_file)
     data = open(data_file, 'r')
     out = open(output_file, 'w')
 
     #Dictionary for trees, key: value = tree: [tree number, count]
-    trees = {}
+    if not trees:
+        trees = collections.OrderedDict()
     #key: value == index: POS, HEAD INDEX, DEP LABEL
     sentence_hash = {}
     #For writing to file
@@ -153,7 +194,7 @@ def Trees(data_file, dep_file, output_file):
         #Create hash map with words in sentence and 
         #add arguments to seperate hash map
         elif line and line[0] != "#":
-            line = line.split()
+            line = line.split('\t')
             output.append(line)
             if line[6] != "_":
                 sentence_hash[line[0]] = (line[3], line[6], line[7])
@@ -166,12 +207,62 @@ def Trees(data_file, dep_file, output_file):
 
     data.close()
     out.close()
-    print len(trees)
+    return trees
 
 if __name__ == '__main__':
 
-    data_file = "./ud-treebanks-conll2017/UD_English/en-ud-train.conllu"
-    dep_file = "./possible_deps.txt"
-    output_file = './en-ud-train.conll16'
+    dep_file = "./deps.txt"
 
-    Trees(data_file, dep_file, output_file)
+    names = []
+    r = "./ud-treebanks-conll2017"
+    for root, dirs, files in os.walk("./ud-treebanks-conll2017"):
+        for name in dirs:
+            names.append(name)
+
+    for name in names:
+        print name
+        if len(name.split('_')) != 2:
+            temp = name.split('_')
+            out = ''
+            for x in xrange(1, len(temp)):
+                out += temp[x]+"_"
+            out = out[:len(out)-1]
+            directory = "./output/"+out
+            grammar = "./grammars/"+out
+        else:
+            directory = "./output/"+name.split('_')[1]
+            grammar = "./grammars/"+name.split('_')[1]
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        if not os.path.exists(grammar):
+            os.makedirs(grammar)
+
+        info = open(directory+"/info.txt", "w")
+        for root, dirs, files in os.walk(os.path.join(r, name)):
+            for f in files:
+                if "train.conllu" in f:
+                    train_file = os.path.join(root, f)
+                    train_output_file = directory+"/"
+                    train_output_file += f.split(".")[0]+".conll16"
+                if "dev.conllu" in f:
+                    dev_file = os.path.join(root, f)
+                    dev_output_file = directory+"/"
+                    dev_output_file += f.split(".")[0]+".conll16"
+
+        trees = Trees(train_file, dep_file, train_output_file)
+        print len(trees)
+        info.write("Number of trees in train: ")
+        info.write(str(len(trees))+'\n')
+
+        trees = Trees(dev_file, dep_file, dev_output_file, trees)
+        print len(trees)
+        info.write("Number of trees in dev and train: ")
+        info.write(str(len(trees))+'\n')
+
+        info.close()
+        g = open(grammar+"/trees.txt", 'w')
+        for tree in trees:
+            g.write(trees[tree][0]+":\n")
+            g.write(tree)
+
+        g.close()
