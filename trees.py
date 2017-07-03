@@ -209,13 +209,10 @@ def Trees(data_file, dep_file, output_file, trees=None):
     out.close()
     return trees
 
-if __name__ == '__main__':
-
-    dep_file = "./deps.txt"
+def create_All_UD(root_file, dep_file):
 
     names = []
-    r = "./ud-treebanks-conll2017"
-    for root, dirs, files in os.walk("./ud-treebanks-conll2017"):
+    for root, dirs, files in os.walk(root_file):
         for name in dirs:
             names.append(name)
 
@@ -238,7 +235,7 @@ if __name__ == '__main__':
             os.makedirs(grammar)
 
         info = open(directory+"/info.txt", "w")
-        for root, dirs, files in os.walk(os.path.join(r, name)):
+        for root, dirs, files in os.walk(os.path.join(root_file, name)):
             for f in files:
                 if "train.conllu" in f:
                     train_file = os.path.join(root, f)
@@ -266,3 +263,10 @@ if __name__ == '__main__':
             g.write(tree)
 
         g.close()
+
+if __name__ == '__main__':
+
+    #dep_file = "./deps.txt"
+    #root_file = "./ud-treebanks-conll2017"
+    #create_All_UD(root_file, dep_file)
+

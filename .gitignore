@@ -4,3 +4,4 @@ reduced.conllu
 examples.conllu
 output/*
 grammars/*
+WSJ/*
