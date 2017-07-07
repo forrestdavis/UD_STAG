@@ -27,6 +27,7 @@ amod:mode 1
 amod:att 1
 appos 1
 aux 1
+auxpass 1
 aux:pass 1
 aux:q 1
 aux:caus 1
@@ -61,6 +62,7 @@ conj:extend 1
 cop 1
 cop:own 1
 csubj 0
+csubjpass 0
 csubj:cleft 0
 csubj:pass 0
 csubj:cop 0
@@ -85,6 +87,7 @@ flat 1
 flat:name 1
 flat:foreign 1
 goeswith 1
+dobj 0
 iobj 0
 list 0
 mark 0
@@ -110,6 +113,7 @@ nmod:tmod 1
 nmod:clas 1
 nmod:abl 1
 nsubj 0
+nsubjpass 0
 nsubj:nc 0
 nsubj:lvc 0
 nsubj:pass 0
@@ -138,3 +142,5 @@ xcomp 1
 xcomp:pred 1
 xcomp:ds 1
 xcomp:adj 1
+mwe 1
+neg 1

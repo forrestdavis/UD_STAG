@@ -65,16 +65,6 @@ def extract(num, trees, sentence_hash, arguments, deps, output, out):
             out.write('\t'.join(word)+'\n')
         #Word is a verb or root
         elif word[0] in arguments:
-            '''
-            #Handle parataxis NEED TO CHECK
-            if word[7] == 'root' and word[3] == "NOUN":
-                if len(arguments[word[0]]) > 2:
-                    print '---------------------------'
-                    print arguments
-                    for w in output:
-                        print w
-            else:
-            '''
             crossed_Verb = 0
             tree = ''
             for arg in arguments[word[0]]:
@@ -266,7 +256,36 @@ def create_All_UD(root_file, dep_file):
 
 if __name__ == '__main__':
 
-    #dep_file = "./deps.txt"
+    data_file = "reduced.conll09"
+    dep_file = "srl_deps.txt"
+    output_file = "srl.conll16"
+
+    SRL_Trees(data_file, dep_file, output_file)
+
+    '''
+    dep_file = "./deps.txt"
     #root_file = "./ud-treebanks-conll2017"
     #create_All_UD(root_file, dep_file)
+    grammar = open("wsj_grammar.txt", "w")
+    data_file = "./WSJ/wsj.train.conllu"
+    output_file = "./wsj.train.conll16"
+    trees = Trees(data_file, dep_file, output_file)
 
+    print len(trees)
+
+    data_file = "./WSJ/wsj.dev.conllu"
+    output_file = "./wsj.dev.conll16"
+    trees = Trees(data_file, dep_file, output_file, trees)
+
+    print len(trees)
+
+    data_file = "./WSJ/wsj.test.conllu"
+    output_file = "./wsj.test.conll16"
+    trees = Trees(data_file, dep_file, output_file, trees)
+    print len(trees)
+    for tree in trees:
+        grammar.write(trees[tree][0]+":\n")
+        grammar.write(tree)
+
+    grammar.close()
+    '''
