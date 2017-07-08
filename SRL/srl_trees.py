@@ -1,4 +1,4 @@
-import collections, os
+import collections, os, sys
 
 #Returns dictionary, key: value = dependency: 0/1
 #if 0, dep represents a substitution node
@@ -196,11 +196,25 @@ def SRL_Trees(data_file, dep_file, output_file, trees=None):
 
 if __name__ == '__main__':
 
-    data_file = "reduced.conll09"
-    dep_file = "srl_deps.txt"
-    output_file = "srl.conll16"
+    if len(sys.argv) == 1:
+        print "Usage: python srl_trees.py conll09 files"
+        print "All files listed in command line will use", 
+        print " the same elementary trees"
+        print "output is filename.tag"
+        sys.exit(1)
 
-    trees = SRL_Trees(data_file, dep_file, output_file)
-    for tree in trees:
-        print trees[tree][0], tree
+    dep_file = "srl_deps.txt"
+    grammar_file = open("srl_grammar.txt", "w")
+    trees = None
+
+    for x in range(1, len(sys.argv)):
+        data_file = sys.argv[x]
+        output_file = sys.argv[x].split('.')[0]+".tag"
+        trees = SRL_Trees(data_file, dep_file, output_file)
+
     
+    for tree in trees:
+        grammar_file.write(trees[tree][0]+":\n")
+        grammar_file.write(tree)
+
+    grammar_file.close()
