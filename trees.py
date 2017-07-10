@@ -256,13 +256,6 @@ def create_All_UD(root_file, dep_file):
 
 if __name__ == '__main__':
 
-    data_file = "reduced.conll09"
-    dep_file = "srl_deps.txt"
-    output_file = "srl.conll16"
-
-    SRL_Trees(data_file, dep_file, output_file)
-
-    '''
     dep_file = "./deps.txt"
     #root_file = "./ud-treebanks-conll2017"
     #create_All_UD(root_file, dep_file)
@@ -288,4 +281,3 @@ if __name__ == '__main__':
         grammar.write(tree)
 
     grammar.close()
-    '''

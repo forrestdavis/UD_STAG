@@ -1,13 +1,13 @@
 #0 is substitution 
 #1 is adjunction
-ADV 1
-ADV-GAP 1
+ADV 0
+ADV-GAP 0
 AMOD 1
-AMOD-GAP1 1
+AMOD-GAP 1
 APPO 1
 BNF 0
 CONJ 1
-COORD 1
+COORD 0
 DEP 1
 DEP-GAP 1
 DIR 1

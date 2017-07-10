@@ -84,9 +84,8 @@ def srl_extract(num, trees, sentence_hash, arguments, deps, output, out):
 
         #Word is a adjunct
         elif deps[dep] == '1':
-            '''
-            if dep == 'root':
-                tree = word[3]+'\t'+'b\n'
+            if dep == 'ROOT':
+                tree = pos+'\t'+'b\n'
                 if tree in trees:
                     tree_num = trees[tree][0]
                     trees[tree][1] += 1
@@ -98,37 +97,36 @@ def srl_extract(num, trees, sentence_hash, arguments, deps, output, out):
                 out.write('\t'.join(word)+'\n')
 
             else:
-            '''
-            head = sentence_hash[word[0]][1]
-            index = word[0]
-            if int(head) < int(index):
-                tree = sentence_hash[head][0]+'\t'+'w\n'
-                tree += '  '+dep+'\n'
-                tree += '\t'+pos+'\t'+'b\n'
-                if tree in trees:
-                    tree_num = trees[tree][0]
-                    trees[tree][1] += 1
+                head = sentence_hash[word[0]][1]
+                index = word[0]
+                if int(head) < int(index):
+                    tree = sentence_hash[head][0]+'\t'+'w\n'
+                    tree += '  '+dep+'\n'
+                    tree += '\t'+pos+'\t'+'b\n'
+                    if tree in trees:
+                        tree_num = trees[tree][0]
+                        trees[tree][1] += 1
+                    else:
+                        tree_num = 'd'+str(num[0])
+                        trees[tree] = [tree_num, 1]
+                        num[0]+=1
+                    word.append(tree_num)
+                    out.write('\t'.join(word)+'\n')
                 else:
-                    tree_num = 'd'+str(num[0])
-                    trees[tree] = [tree_num, 1]
-                    num[0]+=1
-                word.append(tree_num)
-                out.write('\t'.join(word)+'\n')
-            else:
-                tree = '\t'+sentence_hash[head][0]+'\t'+'w\n'
-                tree += '  '+dep+'\n'
-                tree += pos+'\t'+'b\n'
-                if tree in trees:
-                    tree_num = trees[tree][0]
-                    trees[tree][1] += 1
+                    tree = '\t'+sentence_hash[head][0]+'\t'+'w\n'
+                    tree += '  '+dep+'\n'
+                    tree += pos+'\t'+'b\n'
+                    if tree in trees:
+                        tree_num = trees[tree][0]
+                        trees[tree][1] += 1
 
-                else:
-                    tree_num = 'd'+str(num[0])
-                    trees[tree] = [tree_num, 1]
-                    num[0]+=1
-                word.append(tree_num)
-                out.write('\t'.join(word)+'\n')
-            
+                    else:
+                        tree_num = 'd'+str(num[0])
+                        trees[tree] = [tree_num, 1]
+                        num[0]+=1
+                    word.append(tree_num)
+                    out.write('\t'.join(word)+'\n')
+                
         else:
             print "-----------------------------------"
             print "ERROR:"
